@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<ImageView
+	   android:layout_width="fill_parent"
+	   android:layout_height="fill_parent"
+	   android:src="@drawable/title"
+	   android:adjustViewBounds="true"
+	   android:scaleType="centerCrop"/>
+</RelativeLayout>
