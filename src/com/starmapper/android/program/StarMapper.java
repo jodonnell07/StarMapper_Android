@@ -2,6 +2,8 @@ package com.starmapper.android.program;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -10,8 +12,12 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.view.GestureDetector;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 
 import com.example.starmapper_android.R;
@@ -20,16 +26,37 @@ import com.starmapper.android.math.Geocentric;
 import com.starmapper.android.math.Matrix3x3;
 import com.starmapper.android.sensors.AccelerometerModel;
 import com.starmapper.android.sensors.MagneticFieldModel;
-import com.starmapper.android.user.Geographic;
 import com.starmapper.android.user.User;
 import com.starmapper.android.utils.Flinger;
 import com.starmapper.android.utils.Flinger.FlingListener;
 import com.starmapper.android.utils.MathUtils;
 import com.starmapper.android.utils.Zoom;
 
-public class StarMapper extends Activity implements MathConstants {
+public class StarMapper extends Activity implements MathConstants, OnSharedPreferenceChangeListener {
 
-	//private static final String TAG = "StarMapper";
+	// keys used by Preferences
+	public static final String PREF_KEY_STARS            = "settings_provider_stars";
+	public static final String PREF_KEY_BACKGROUND_STARS = "settings_provider_background_stars";
+	public static final String PREF_KEY_CONSTELLATIONS   = "settings_provider_constellations";
+	public static final String PREF_KEY_SUN              = "settings_provider_sun";
+	public static final String PREF_KEY_MOON             = "settings_provider_moon";
+	public static final String PREF_KEY_PLANETS          = "settings_provider_planets";
+	public static final String PREF_KEY_CELESTIAL_GRID   = "settings_provider_celestial_grid";
+	
+	// Settings fragment for user settings
+	public static class SettingsFragment extends PreferenceFragment {
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			addPreferencesFromResource(R.xml.preferences);
+		}
+	}
+	
+	/** Preferences shared between all activities **/
+	private SharedPreferences sharedPreferences;
+	
+	/** SettingsFragment for user settings **/
+	private SettingsFragment settingsFragment;
 	
 	/** Model for the User **/
 	public User mUser;
@@ -70,6 +97,12 @@ public class StarMapper extends Activity implements MathConstants {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		
+		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+		settingsFragment = new SettingsFragment();
+
+		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 		
 		//Debug
 //		setContentView(R.layout.title);
@@ -141,7 +174,9 @@ public class StarMapper extends Activity implements MathConstants {
 		if (mMagneticFieldSensor != null) {
 			mSensorManager.registerListener(mMagneticFieldModel, mMagneticFieldSensor, SensorManager.SENSOR_DELAY_FASTEST);
 		}
-		//mUseAutoSensorMode = false;		
+		//****** DEBUG ******
+		//mUseAutoSensorMode = false;
+		
 		// flinger
 		flinger = new GestureDetector(this, new Flinger(new FlingListener() {
 			public void fling(float distanceX, float distanceY) {
@@ -184,7 +219,32 @@ public class StarMapper extends Activity implements MathConstants {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.activity_star_mapper, menu);
+		getMenuInflater().inflate(R.menu.menu_star_mapper, menu);
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()) {
+		    case R.id.menu_settings:
+		    	getFragmentManager().beginTransaction().addToBackStack(null).replace(android.R.id.content, settingsFragment).commit();
+		    	break;
+		    case R.id.menu_auto_sensor_mode:
+		    	mUseAutoSensorMode = !mUseAutoSensorMode;
+		    	if (mUseAutoSensorMode) {
+		    		mSensorManager.registerListener(mAccelerometerModel, mAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
+		    		mSensorManager.registerListener(mMagneticFieldModel, mMagneticFieldSensor, SensorManager.SENSOR_DELAY_FASTEST);
+		    	} else {
+		    		mSensorManager.unregisterListener(mAccelerometerModel);
+		    		mSensorManager.unregisterListener(mMagneticFieldModel);
+		    	}
+		    	break;
+		    case R.id.menu_test:
+		    	//this won't do anything
+		    	break;
+		    default:
+		    	return false;
+		}
 		return true;
 	}
 	
@@ -341,5 +401,17 @@ public class StarMapper extends Activity implements MathConstants {
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		Preference preference = settingsFragment.findPreference(key);
+		if (key.equals(PREF_KEY_STARS)) { mStarMapperRenderer.setStarsIsEnabled(sharedPreferences.getBoolean(PREF_KEY_STARS, true)); }
+		else if (key.equals(PREF_KEY_BACKGROUND_STARS)) { mStarMapperRenderer.setBGStarsIsEnabled(sharedPreferences.getBoolean(PREF_KEY_BACKGROUND_STARS, true)); }
+		else if (key.equals(PREF_KEY_CONSTELLATIONS)) { mStarMapperRenderer.setConstellationsIsEnabled(sharedPreferences.getBoolean(PREF_KEY_CONSTELLATIONS, true)); }
+		else if (key.equals(PREF_KEY_SUN)) { mStarMapperRenderer.setSunIsEnabled(sharedPreferences.getBoolean(PREF_KEY_SUN, true)); }
+		else if (key.equals(PREF_KEY_MOON)) { mStarMapperRenderer.setMoonIsEnabled(sharedPreferences.getBoolean(PREF_KEY_MOON, true)); }
+		else if (key.equals(PREF_KEY_PLANETS)) { mStarMapperRenderer.setPlanetsIsEnabled(sharedPreferences.getBoolean(PREF_KEY_PLANETS, true)); }
+		else if (key.equals(PREF_KEY_CELESTIAL_GRID)) { mStarMapperRenderer.setCelestialGridIsEnabled(sharedPreferences.getBoolean(PREF_KEY_CELESTIAL_GRID, true)); }
 	}
 }

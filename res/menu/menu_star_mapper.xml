@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_settings"
+        android:orderInCategory="0"
+        android:showAsAction="never"
+        android:title="@string/menu_settings"
+        android:icon="@android:drawable/ic_menu_preferences"/>
+    <item
+        android:id="@+id/menu_auto_sensor_mode"
+        android:orderInCategory="1"
+        android:showAsAction="never"
+        android:title="@string/menu_automanual_mode"
+        android:icon="@android:drawable/ic_menu_compass"/>
+    <item
+        android:id="@+id/menu_test"
+        android:orderInCategory="2"
+        android:showAsAction="never"
+        android:title="@string/menu_test"
+        android:icon="@android:drawable/ic_menu_preferences"/>
+        
+</menu>

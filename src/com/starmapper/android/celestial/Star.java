@@ -14,7 +14,7 @@ public class Star {
 	// Constructors
 	public Star(RaDec argRaDec) {
 		raDec = argRaDec;
-		geoCoords.setUsingRaDec(argRaDec);
+		geoCoords = new Geocentric(raDec);
 	}
 	public Star() {
 		name = "";

@@ -4,9 +4,11 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.example.starmapper_android.R;
@@ -24,6 +26,8 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 
 	private final Context mActivityContext;
 	
+	private SharedPreferences sharedPreferences;
+	
 	public int mScreenHeight;
 	public int mScreenWidth;
 	
@@ -31,6 +35,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	public boolean mUpdatePerspective;
 	public float mFovYRad;
 	public float mPointSizeFactor;
+	public float mBGPointSizeFactor;
 	public float mLineSizeFactor;
 	
 	/** View Matrix values **/
@@ -46,6 +51,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 
 	/** Rendering Managers **/
 	private ConstellationManager mConstellationManager;
+	private BGStarManager mBGStarManager;
 	private GridManager mGridManager;
 	private PlanetManager mPlanetManager;
 	private SunManager mSunManager;
@@ -86,6 +92,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	
 	/** Handle passes texture data to shader **/
 	private int mStarTextureDataHandle;
+	private int mBGStarTextureDataHandle;
 	private int mGridTextureDataHandle;
 	private int mConstLineTextureDataHandle;
 	private int[] mPlanetTextureDataHandles;
@@ -107,12 +114,31 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	/** Handle to pass in texture coordinate attribute to the shader program **/
 	private int mTextureCoordinateHandle;
 
+	/** Draw switches **/
+	private boolean mBGStarsIsEnabled;
+	private boolean mStarsIsEnabled;
+	private boolean mConstellationsIsEnabled;
+	private boolean mCelestialGridIsEnabled;
+	private boolean mMoonIsEnabled;
+	private boolean mPlanetsIsEnabled;
+	private boolean mSunIsEnabled;
+	
 	/*
 	 * This constructor is only temporary to define the square the star texture will be written on
 	 */
 	public StarMapperRenderer(final Context activityContext) {
 		
 		mActivityContext = activityContext;
+		
+		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activityContext);
+		
+		mBGStarsIsEnabled        = sharedPreferences.getBoolean(StarMapper.PREF_KEY_BACKGROUND_STARS, true);
+		mStarsIsEnabled          = sharedPreferences.getBoolean(StarMapper.PREF_KEY_STARS, true);
+		mConstellationsIsEnabled = sharedPreferences.getBoolean(StarMapper.PREF_KEY_CONSTELLATIONS, true);
+		mCelestialGridIsEnabled  = sharedPreferences.getBoolean(StarMapper.PREF_KEY_CELESTIAL_GRID, true);
+		mMoonIsEnabled           = sharedPreferences.getBoolean(StarMapper.PREF_KEY_MOON, true);
+		mPlanetsIsEnabled        = sharedPreferences.getBoolean(StarMapper.PREF_KEY_PLANETS, true);
+		mSunIsEnabled            = sharedPreferences.getBoolean(StarMapper.PREF_KEY_SUN, true);
 		
 		mPlanetTextureDataHandles = new int[NUM_PLANETS];
 		
@@ -128,49 +154,6 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		mUpX = INIT_UP_VECTOR.x;
 		mUpY = INIT_UP_VECTOR.y;
 		mUpZ = INIT_UP_VECTOR.z;
-
-/*
-		// Define the points of square that star texture will be applied to
-		// X, Y, Z
-		final float[] starPositionData = {
-				// counter-clockwise winding
-				-0.1000f, 0.1000f, 1.0f,
-				-0.1000f, -0.1000f, 1.0f,
-				0.1000f, 0.1000f, 1.0f,
-				-0.1000f, -0.1000f, 1.0f,
-				0.1000f, -0.1000f, 1.0f,
-				0.1000f, 0.1000f, 1.0f
-		};
-		
-		// R, G, B, A
-		final float[] starColorData = {
-				0.0f, 0.0f, 1.0f, 1.0f,
-				0.0f, 0.0f, 1.0f, 1.0f,
-				0.0f, 0.0f, 1.0f, 1.0f,
-				0.0f, 0.0f, 1.0f, 1.0f,
-				0.0f, 0.0f, 1.0f, 1.0f,
-				0.0f, 0.0f, 1.0f, 1.0f,
-		};
-		
-		// S, T (or X, Y)
-		// Y axis is flipped in image
-		final float[] starTextureCoordinateData = {
-				0.0f, 0.0f,
-				0.0f, 1.0f,
-				0.5f, 0.0f,
-				0.0f, 1.0f,
-				0.5f, 1.0f,
-				0.5f, 0.0f,
-		};
-		
-		// Initialize the buffers
-		mStarPositions = ByteBuffer.allocateDirect(starPositionData.length * mBytesPerFloat).order(ByteOrder.nativeOrder()).asFloatBuffer();
-		mStarColors = ByteBuffer.allocateDirect(starColorData.length * mBytesPerFloat).order(ByteOrder.nativeOrder()).asFloatBuffer();
-		mStarTextureCoordinates = ByteBuffer.allocateDirect(starTextureCoordinateData.length * mBytesPerFloat).order(ByteOrder.nativeOrder()).asFloatBuffer();
-		mStarPositions.put(starPositionData).position(0);
-		mStarColors.put(starColorData).position(0);
-		mStarTextureCoordinates.put(starTextureCoordinateData).position(0);
-*/
 	}
 	
 	protected String getVertexShader() {
@@ -206,6 +189,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		if (mUpdatePerspective) {
 		    updatePerspectiveMatrix();
 			mConstellationManager.updateDrawData();
+			mBGStarManager.updateDrawData();
 			mGridManager.updateDrawData();
 			mPlanetManager.updateDrawData();
 			mSunManager.updateDrawData();
@@ -255,33 +239,45 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		// Tell the texture uniform sampler to use this texture in the shader program by binding to texture unit 0
 		GLES20.glUniform1f(mTextureUniformHandle, GLES20.GL_TEXTURE0);
 		
-		// Bind grid texture to the texture target
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mGridTextureDataHandle);
-		mGridManager.drawGrid(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
-		
-		// Bind constLine texture to the texture target
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mConstLineTextureDataHandle);
-		mConstellationManager.drawConstLines(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
-		
-		// Bind star texture to the texture target
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mStarTextureDataHandle);
-		mConstellationManager.drawConstellations(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
-		
-		// Bind planet texture to the texture target
-		for (PlanetEnum planetEnum : PlanetEnum.values()) {
-			if (planetEnum == PlanetEnum.EARTH) { continue; }
-			int planetIdx = planetEnum.ordinal();
-			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mPlanetTextureDataHandles[planetIdx]);
-			mPlanetManager.drawPlanet(mPositionHandle, mColorHandle, mTextureCoordinateHandle, planetIdx);
+		if (mCelestialGridIsEnabled) {
+		    // Bind grid texture to the texture target
+		    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mGridTextureDataHandle);
+		    mGridManager.drawGrid(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
 		}
-		
-		// Bind sun texture to the texture target
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mSunTextureDataHandle);
-		mSunManager.drawSun(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
-		
-		// Bind moon texture to the texture target
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mMoonTextureDataHandle);
-		mMoonManager.drawMoon(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
+		if (mConstellationsIsEnabled) {
+		    // Bind constLine texture to the texture target
+		    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mConstLineTextureDataHandle);
+		    mConstellationManager.drawConstLines(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
+		}
+		if (mStarsIsEnabled) {
+		    // Bind star texture to the texture target
+		    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mStarTextureDataHandle);
+		    mConstellationManager.drawConstellations(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
+		}
+		if (mBGStarsIsEnabled) {
+		    // Bind background star texture to the texture target
+		    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mBGStarTextureDataHandle);
+		    mBGStarManager.drawBGStars(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
+		}
+		if (mPlanetsIsEnabled) {
+		    // Bind planet texture to the texture target
+		    for (PlanetEnum planetEnum : PlanetEnum.values()) {
+			    if (planetEnum == PlanetEnum.EARTH) { continue; }
+			    int planetIdx = planetEnum.ordinal();
+			    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mPlanetTextureDataHandles[planetIdx]);
+			    mPlanetManager.drawPlanet(mPositionHandle, mColorHandle, mTextureCoordinateHandle, planetIdx);
+		    }
+		}
+		if (mSunIsEnabled) {
+		    // Bind sun texture to the texture target
+		    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mSunTextureDataHandle);
+		    mSunManager.drawSun(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
+		}
+		if (mMoonIsEnabled) {
+		    // Bind moon texture to the texture target
+		    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mMoonTextureDataHandle);
+		    mMoonManager.drawMoon(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
+		}
 		
 		//draw();		
 	}
@@ -307,6 +303,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		if (mUpdatePerspective) {
 		    updatePerspectiveMatrix();
 			mConstellationManager.updateDrawData();
+			mBGStarManager.updateDrawData();
 			mGridManager.updateDrawData();
 			mPlanetManager.updateDrawData();
 			mSunManager.updateDrawData();
@@ -335,11 +332,14 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		mUpdatePerspective = true;
 		mFovYRad = INIT_FOV_Y_RAD;
 		mPointSizeFactor = MathUtils.tan(INIT_FOV_Y_RAD / 2.0f) / SCREEN_HEIGHT;
+		mBGPointSizeFactor = mPointSizeFactor / 3;
 		mLineSizeFactor  = mPointSizeFactor * 2;
 		
 		// Initialize all the managers
 		mConstellationManager = new ConstellationManager(this);
 		mConstellationManager.BuildConstellationsFromRawResource(mActivityContext, R.raw.constellation_bayer_list);
+		mBGStarManager = new BGStarManager(this);
+		mBGStarManager.BuildBGStars();
 		mGridManager = new GridManager(this);
 		mGridManager.BuildGrid();
 		mPlanetManager = new PlanetManager(this);
@@ -351,6 +351,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		
 		// Initialize all the rendering buffers
 		mConstellationManager.initializeBuffers();
+		mBGStarManager.initializeBuffers();
 		mGridManager.initializeBuffers();
 		mPlanetManager.initializeBuffers();
 		mSunManager.initializeBuffers();
@@ -358,6 +359,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		
 		// updateDrawData will probably move into onDrawFrame, putting it here in onSurfaceCreated for now since it isn't changing
 		mConstellationManager.updateDrawData();
+		mBGStarManager.updateDrawData();
 		mGridManager.updateDrawData();
 		mPlanetManager.updateDrawData();
 		mSunManager.updateDrawData();
@@ -365,6 +367,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		
 		// Load the textures data
 		mStarTextureDataHandle = TextureUtils.loadTexture(mActivityContext, R.drawable.brightstar_new4);
+		mBGStarTextureDataHandle = TextureUtils.loadTexture(mActivityContext, R.drawable.brightstar_new4);
 		mGridTextureDataHandle = TextureUtils.loadTexture(mActivityContext, R.drawable.gridline_texture);
 		mConstLineTextureDataHandle = TextureUtils.loadTexture(mActivityContext, R.drawable.constline_texture);
 		mPlanetTextureDataHandles[PlanetEnum.MERCURY.ordinal()] = TextureUtils.loadTexture(mActivityContext, R.drawable.mercury);
@@ -451,6 +454,30 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 //		Log.d("TAG", "AFTER NORMALIZING UP: " + "mUpX: " + String.valueOf(mUpX) + " mUpY: " + String.valueOf(mUpY) + " mUpZ: " + String.valueOf(mUpZ));
 		
 	}
+	
+	// Preference methods to set/disable drawing of differe objects
+	public void setStarsIsEnabled(boolean isEnabled) {
+		mStarsIsEnabled = isEnabled;
+	}
+	public void setBGStarsIsEnabled(boolean isEnabled) {
+		mBGStarsIsEnabled = isEnabled;
+	}
+	public void setConstellationsIsEnabled(boolean isEnabled) {
+		mConstellationsIsEnabled = isEnabled;
+	}
+	public void setCelestialGridIsEnabled(boolean isEnabled) {
+		mCelestialGridIsEnabled = isEnabled;
+	}
+	public void setSunIsEnabled(boolean isEnabled) {
+		mSunIsEnabled = isEnabled;
+	}
+	public void setMoonIsEnabled(boolean isEnabled) {
+		mMoonIsEnabled = isEnabled;
+	}
+	public void setPlanetsIsEnabled(boolean isEnabled) {
+		mPlanetsIsEnabled = isEnabled;
+	}
+	
 	/*
 	 * NOT USED, KEPT FOR REFERENCE
 	 */

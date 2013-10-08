@@ -3,8 +3,8 @@ package com.starmapper.android.math;
 public class RaDec {
 	
 	// Coordinates in degrees
-	public float ra;
-	public float dec;
+	public float ra;		// 0 < 360
+	public float dec;		// -90 < 90
 	
 	// Constructors
 	public RaDec() {

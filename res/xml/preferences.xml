@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory
+        android:title="@string/settings_title">
+        <CheckBoxPreference
+            android:key="settings_provider_stars"
+            android:defaultValue="true"
+            android:title="@string/settings_stars" />
+        <CheckBoxPreference
+            android:key="settings_provider_background_stars"
+            android:defaultValue="true"
+            android:title="@string/settings_background_stars" />
+        <CheckBoxPreference
+            android:key="settings_provider_constellations"
+            android:defaultValue="true"
+            android:title="@string/settings_constellations" />
+        <CheckBoxPreference
+            android:key="settings_provider_sun"
+            android:defaultValue="true"
+            android:title="@string/settings_sun" />
+        <CheckBoxPreference
+            android:key="settings_provider_moon"
+            android:defaultValue="true"
+            android:title="@string/settings_moon" />
+        <CheckBoxPreference
+            android:key="settings_provider_planets"
+            android:defaultValue="true"
+            android:title="@string/settings_planets" />
+        <CheckBoxPreference
+            android:key="settings_provider_celestial_grid"
+            android:defaultValue="true"
+            android:title="@string/settings_celestial_grid" />
+    </PreferenceCategory>
+</PreferenceScreen>

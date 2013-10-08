@@ -13,10 +13,10 @@ public interface OrbitalElementsConstants {
 		MERCURY, VENUS, EARTH, MARS, JUPITER, SATURN, URANUS, NEPTUNE
 	}
 	
-	public static final float   SUN_SCALE_FACTOR = 325f;
-	public static final float	MOON_SCALE_FACTOR = 225f;
+	public static final float   SUN_SCALE_FACTOR = 200f;
+	public static final float	MOON_SCALE_FACTOR = 180f;
 	public static final float[] PLANET_SCALE_FACTOR = {
-		120f, 130f, 130f, 125f, 200f, 175f, 150f, 150f
+		85f, 95f, 100f, 90f, 120f, 130f, 130f, 105f
 	};
 	
 	/* PLANETARY MEAN ORBITS */

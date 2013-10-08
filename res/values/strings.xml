@@ -3,7 +3,18 @@
 
     <string name="app_name">StarMapper_Android</string>
     <string name="hello_world">Hello world!</string>
+    
     <string name="menu_settings">Settings</string>
-    <string name="menu_test">TEST</string>
+    <string name="menu_automanual_mode">Auto/Manual</string>
+    <string name="menu_test">Mode</string>
+    
+    <string name="settings_title">Settings</string>
+    <string name="settings_stars">Stars</string>
+    <string name="settings_background_stars">Background Stars</string>
+    <string name="settings_constellations">Constellations</string>
+    <string name="settings_sun">Sun</string>
+    <string name="settings_moon">Moon</string>
+    <string name="settings_planets">Planets</string>
+    <string name="settings_celestial_grid">Celestial Grid</string>
 
 </resources>
