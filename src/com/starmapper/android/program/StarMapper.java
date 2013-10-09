@@ -234,6 +234,8 @@ public class StarMapper extends Activity implements MathConstants, OnSharedPrefe
 		    	if (mUseAutoSensorMode) {
 		    		mSensorManager.registerListener(mAccelerometerModel, mAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
 		    		mSensorManager.registerListener(mMagneticFieldModel, mMagneticFieldSensor, SensorManager.SENSOR_DELAY_FASTEST);
+		    		// Reset perspective matrix to AutoSensor settings in case zoom changed during manual mode
+		    		mStarMapperRenderer.resetPerspective();
 		    	} else {
 		    		mSensorManager.unregisterListener(mAccelerometerModel);
 		    		mSensorManager.unregisterListener(mMagneticFieldModel);

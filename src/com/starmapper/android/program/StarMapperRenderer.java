@@ -455,6 +455,14 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		
 	}
 	
+	public void resetPerspective() {
+		mFovYRad = INIT_FOV_Y_RAD;
+		mPointSizeFactor = MathUtils.tan(INIT_FOV_Y_RAD / 2.0f) / SCREEN_HEIGHT;
+		mBGPointSizeFactor = mPointSizeFactor / 3;
+		mLineSizeFactor  = mPointSizeFactor * 2;
+		mUpdatePerspective = true;
+	}
+	
 	// Preference methods to set/disable drawing of differe objects
 	public void setStarsIsEnabled(boolean isEnabled) {
 		mStarsIsEnabled = isEnabled;
