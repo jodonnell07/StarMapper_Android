@@ -5,6 +5,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -25,6 +26,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	private static final String TAG = "StarMapperRenderer";
 
 	private final Context mActivityContext;
+	private final Resources mActivityResources;
 	
 	private SharedPreferences sharedPreferences;
 	
@@ -56,6 +58,8 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	private PlanetManager mPlanetManager;
 	private SunManager mSunManager;
 	private MoonManager mMoonManager;
+	// public because other managers will be adding labels of their objects through this field
+	public LabelManager mLabelManager;
 	
 	/*** DEBUG ***/
 //	private float[][] mLookVectorTracker = new float[50][3];
@@ -98,6 +102,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	private int[] mPlanetTextureDataHandles;
 	private int mSunTextureDataHandle;
 	private int mMoonTextureDataHandle;
+	private int mLabelTextureDataHandle;
 	
 	/** Handle to the star shader program **/
 	private int mProgramHandle;
@@ -122,6 +127,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	private boolean mMoonIsEnabled;
 	private boolean mPlanetsIsEnabled;
 	private boolean mSunIsEnabled;
+	private boolean mLabelsIsEnabled;
 	
 	/*
 	 * This constructor is only temporary to define the square the star texture will be written on
@@ -129,6 +135,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	public StarMapperRenderer(final Context activityContext) {
 		
 		mActivityContext = activityContext;
+		mActivityResources = activityContext.getResources();
 		
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activityContext);
 		
@@ -139,6 +146,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		mMoonIsEnabled           = sharedPreferences.getBoolean(StarMapper.PREF_KEY_MOON, true);
 		mPlanetsIsEnabled        = sharedPreferences.getBoolean(StarMapper.PREF_KEY_PLANETS, true);
 		mSunIsEnabled            = sharedPreferences.getBoolean(StarMapper.PREF_KEY_SUN, true);
+		mLabelsIsEnabled		 = sharedPreferences.getBoolean(StarMapper.PREF_KEY_LABELS, true);
 		
 		mPlanetTextureDataHandles = new int[NUM_PLANETS];
 		
@@ -194,6 +202,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 			mPlanetManager.updateDrawData();
 			mSunManager.updateDrawData();
 			mMoonManager.updateDrawData();
+			mLabelManager.updateDrawData();
 		    mUpdatePerspective = false;
 		}
 /*		for (int i = 49; i > 0; --i) {
@@ -208,10 +217,10 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		// Set the View Matrix (camera position) (OnTouchEvent in main activity will change the look & up values)
 //		Log.d("TAG", "BEFORE UP FIXING   : " + "mUpX: " + String.valueOf(mUpX) + " mLookY: " + String.valueOf(mUpY) + " mLookZ: " + String.valueOf(mUpZ));
 		fixPerpendicular();
-		Log.d("StarMapperRenderer", "mLookX: " + String.valueOf(mLookX) + " mLookY: " + String.valueOf(mLookY) + " mLookZ: " + String.valueOf(mLookZ));
-		Log.d("StarMapperRenderer", "mUpX: " + String.valueOf(mUpX) + " mUpY: " + String.valueOf(mUpY) + " mUpZ: " + String.valueOf(mUpZ));
+//		Log.d("StarMapperRenderer", "mLookX: " + String.valueOf(mLookX) + " mLookY: " + String.valueOf(mLookY) + " mLookZ: " + String.valueOf(mLookZ));
+//		Log.d("StarMapperRenderer", "mUpX: " + String.valueOf(mUpX) + " mUpY: " + String.valueOf(mUpY) + " mUpZ: " + String.valueOf(mUpZ));
 		
-		//DEBUG
+/*		//DEBUG
 		double planet_RA = MathUtils.arctand(mLookY / mLookX) * MathUtils.convertToDegrees;
 		if (mLookX > 0.0f && mLookY < 0.0f) {
 			planet_RA += 360.0f;
@@ -222,7 +231,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		int planet_RA_Minutes = (int) (((planet_RA % 15) / 15.0f) * 60);
 		double planet_Dec = MathUtils.arctan2d(mLookZ, Math.sqrt(mLookX * mLookX + mLookY * mLookY)) * MathUtils.convertToDegrees;
 		Log.d("StarMapperRenderer", "RaDec LookDir:  RA: " + String.valueOf(planet_RA_Hours) + "h " + String.valueOf(planet_RA_Minutes) + "'   Dec: " + String.valueOf(planet_Dec));
-
+*/
 		Matrix.setLookAtM(mViewMatrix, 0, mEyeX, mEyeY, mEyeZ, mLookX, mLookY, mLookZ, mUpX, mUpY, mUpZ);
 		Matrix.setIdentityM(mModelMatrix, 0);
 		Matrix.translateM(mModelMatrix, 0, 0.0f, 0.0f, 0.0f);
@@ -278,7 +287,11 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mMoonTextureDataHandle);
 		    mMoonManager.drawMoon(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
 		}
-		
+		if (mLabelsIsEnabled) {
+			// Bind labels texture to the texture target
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mLabelTextureDataHandle);
+			mLabelManager.drawLabels(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
+		}
 		//draw();		
 	}
 
@@ -308,6 +321,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 			mPlanetManager.updateDrawData();
 			mSunManager.updateDrawData();
 			mMoonManager.updateDrawData();
+			mLabelManager.updateDrawData();
 		    mUpdatePerspective = false;
 		}
 	}
@@ -318,7 +332,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		Log.d("onSurfaceCreated", "Inside onSurfaceCreated");
 		
 		// Set the background to black
-		GLES20.glClearColor(0.025f, 0.025f, 0.025f, 1.0f);
+		GLES20.glClearColor(0.1f, 0.0f, 0.15f, 1.0f);
 //		GLES20.glClearColor(0.4f, 0.0f, 0.6f, 1.0f);
 		
 		// Alpha blending
@@ -336,6 +350,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		mLineSizeFactor  = mPointSizeFactor * 2;
 		
 		// Initialize all the managers
+		mLabelManager = new LabelManager(this, mActivityResources);
 		mConstellationManager = new ConstellationManager(this);
 		mConstellationManager.BuildConstellationsFromRawResource(mActivityContext, R.raw.constellation_bayer_list);
 		mBGStarManager = new BGStarManager(this);
@@ -348,6 +363,13 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		mSunManager.BuildSunData();
 		mMoonManager = new MoonManager(this);
 		mMoonManager.BuildMoonData();
+		
+		// Create all the labels and add them into the label manager
+		mConstellationManager.createLabels();
+		mGridManager.createLabels();
+		mPlanetManager.createLabels();
+		mSunManager.createLabels();
+		mMoonManager.createLabels();
 		
 		// Initialize all the rendering buffers
 		mConstellationManager.initializeBuffers();
@@ -378,7 +400,18 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		mPlanetTextureDataHandles[PlanetEnum.URANUS.ordinal()] = TextureUtils.loadTexture(mActivityContext, R.drawable.uranus);
 		mPlanetTextureDataHandles[PlanetEnum.NEPTUNE.ordinal()] = TextureUtils.loadTexture(mActivityContext, R.drawable.neptune);
 		mSunTextureDataHandle = TextureUtils.loadTexture(mActivityContext, R.drawable.sun);
-		mMoonTextureDataHandle = TextureUtils.loadTexture(mActivityContext, R.drawable.moon);
+		mMoonTextureDataHandle = TextureUtils.loadTexture(mActivityContext, R.drawable.moon);		
+		mLabelTextureDataHandle = TextureUtils.createTexture();
+		
+		// Apply labels to texture
+		mLabelManager.drawLabelsToCanvas();
+		mLabelManager.printLabelsToTexture(mLabelTextureDataHandle);
+		// initialize buffers after drawing to canvas because we need the total number of labels
+		mLabelManager.initializeBuffers();
+		mLabelManager.updateDrawData();
+		
+		// debugging text-based textures
+//		mLabelTextureDataHandle = mLabelManager.debugTexture();
 
 		//set all the OpenGL stuff
 		final String vertexShader = getVertexShader();
@@ -463,7 +496,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		mUpdatePerspective = true;
 	}
 	
-	// Preference methods to set/disable drawing of differe objects
+	// Preference methods to set/disable drawing of different objects
 	public void setStarsIsEnabled(boolean isEnabled) {
 		mStarsIsEnabled = isEnabled;
 	}
@@ -484,6 +517,9 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	}
 	public void setPlanetsIsEnabled(boolean isEnabled) {
 		mPlanetsIsEnabled = isEnabled;
+	}
+	public void setLabelsIsEnabled(boolean isEnabled) {
+		mLabelsIsEnabled = isEnabled;
 	}
 	
 	/*

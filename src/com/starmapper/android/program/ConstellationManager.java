@@ -276,4 +276,31 @@ public class ConstellationManager implements BayerFileConstants , ArrayConstants
 		GLES20.glDisableVertexAttribArray(colorHandle);
 		GLES20.glDisableVertexAttribArray(textureCoordinateHandle);
 	}
+	
+	public void createLabels() {
+		for (Constellation constellation : ConstellationSet) {
+			// finding the center of each constellation, label will go there
+			float minX = 1.0f; float minY = 1.0f; float minZ = 1.0f;
+			float maxX = 0.0f; float maxY = 0.0f; float maxZ = 0.0f;
+			for (Star star : constellation.getStars()) {
+				// check for named stars in the constellation, they will have labels too
+				for (NamedStarsEnum starEnum : NamedStarsEnum.values()) {
+					String namedStar = starEnum.name();
+					if (star.name.equalsIgnoreCase(namedStar)) {
+						mRenderer.mLabelManager.addLabel(star.name, star.getCoords(), STAR_COLOR, STAR_TEXTSIZE, LabelTypeEnum.STAR);
+						break;
+					}
+				}
+				float x = star.geoCoords.x; float y = star.geoCoords.y; float z = star.geoCoords.z;
+				if (x < minX) { minX = x; }; if (x > maxX) { maxX = x; }
+				if (y < minY) { minY = y; }; if (y > maxY) { maxY = y; }
+				if (z < minZ) { minZ = z; }; if (z > maxZ) { maxZ = z; }
+			}
+			float midX = (minX + maxX) / 2; float midY = (minY + maxY) / 2; float midZ = (minZ + maxZ) / 2;
+			Geocentric labelPos = new Geocentric(midX, midY, midZ);
+			labelPos = MathUtils.normalize(labelPos);
+			String name = constellation.getName();
+			mRenderer.mLabelManager.addLabel(name, labelPos, CONSTELLATION_COLOR, CONSTELLATION_TEXTSIZE, LabelTypeEnum.CONSTELLATION);
+		}
+	}
 }

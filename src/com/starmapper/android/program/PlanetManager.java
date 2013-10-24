@@ -170,6 +170,7 @@ public class PlanetManager implements ArrayConstants, MathConstants, OrbitalElem
 			double distance = (float) Math.sqrt(geoCoord_X * geoCoord_X + geoCoord_Y * geoCoord_Y + geoCoord_Z * geoCoord_Z);
 			
 			String planetName = planetEnum.name().toLowerCase();
+			planetName = Character.toUpperCase(planetName.charAt(0)) + planetName.substring(1);
 			Planet planet = new Planet(planetName, new RaDec((float) planet_RA, (float) planet_Dec), distance, planetIdx, PLANET_SCALE_FACTOR[planetIdx]);
 			
 			PlanetSet.add(planet);
@@ -261,6 +262,12 @@ public class PlanetManager implements ArrayConstants, MathConstants, OrbitalElem
 		GLES20.glDisableVertexAttribArray(positionHandle);
 		GLES20.glDisableVertexAttribArray(colorHandle);
 		GLES20.glDisableVertexAttribArray(textureCoordinateHandle);
+	}
+	
+	public void createLabels() {
+		for (Planet planet : PlanetSet) {
+			mRenderer.mLabelManager.addLabel(planet.getName(), planet.getCoords(), PLANET_COLOR, PLANET_TEXTSIZE, LabelTypeEnum.PLANET);
+		}
 	}
 
 }

@@ -78,5 +78,9 @@ public class Planet {
 	public float getScale() {
 		return mScale;
 	}
+	
+	public String getName() {
+		return name;
+	}
 
 }

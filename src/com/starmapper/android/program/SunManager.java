@@ -160,4 +160,8 @@ public class SunManager implements MathConstants, ArrayConstants, OrbitalElement
 		GLES20.glDisableVertexAttribArray(textureCoordinateHandle);
    	
     }
+    
+    public void createLabels() {
+    	mRenderer.mLabelManager.addLabel("Sun", sun.getCoords(), SUN_COLOR, SUN_TEXTSIZE, LabelTypeEnum.SUN);
+    }
 }

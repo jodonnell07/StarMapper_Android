@@ -231,5 +231,9 @@ public class MoonManager implements MathConstants, ArrayConstants, OrbitalElemen
 		GLES20.glDisableVertexAttribArray(textureCoordinateHandle);
    	
     }
+    
+    public void createLabels() {
+    	mRenderer.mLabelManager.addLabel("Moon", moon.getCoords(), MOON_COLOR, MOON_TEXTSIZE, LabelTypeEnum.MOON);
+    }
 
 }

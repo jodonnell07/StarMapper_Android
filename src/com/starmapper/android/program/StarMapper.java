@@ -42,6 +42,7 @@ public class StarMapper extends Activity implements MathConstants, OnSharedPrefe
 	public static final String PREF_KEY_MOON             = "settings_provider_moon";
 	public static final String PREF_KEY_PLANETS          = "settings_provider_planets";
 	public static final String PREF_KEY_CELESTIAL_GRID   = "settings_provider_celestial_grid";
+	public static final String PREF_KEY_LABELS			 = "settings_provider_labels";
 	
 	// Settings fragment for user settings
 	public static class SettingsFragment extends PreferenceFragment {
@@ -407,7 +408,6 @@ public class StarMapper extends Activity implements MathConstants, OnSharedPrefe
 	
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-		Preference preference = settingsFragment.findPreference(key);
 		if (key.equals(PREF_KEY_STARS)) { mStarMapperRenderer.setStarsIsEnabled(sharedPreferences.getBoolean(PREF_KEY_STARS, true)); }
 		else if (key.equals(PREF_KEY_BACKGROUND_STARS)) { mStarMapperRenderer.setBGStarsIsEnabled(sharedPreferences.getBoolean(PREF_KEY_BACKGROUND_STARS, true)); }
 		else if (key.equals(PREF_KEY_CONSTELLATIONS)) { mStarMapperRenderer.setConstellationsIsEnabled(sharedPreferences.getBoolean(PREF_KEY_CONSTELLATIONS, true)); }
@@ -415,5 +415,6 @@ public class StarMapper extends Activity implements MathConstants, OnSharedPrefe
 		else if (key.equals(PREF_KEY_MOON)) { mStarMapperRenderer.setMoonIsEnabled(sharedPreferences.getBoolean(PREF_KEY_MOON, true)); }
 		else if (key.equals(PREF_KEY_PLANETS)) { mStarMapperRenderer.setPlanetsIsEnabled(sharedPreferences.getBoolean(PREF_KEY_PLANETS, true)); }
 		else if (key.equals(PREF_KEY_CELESTIAL_GRID)) { mStarMapperRenderer.setCelestialGridIsEnabled(sharedPreferences.getBoolean(PREF_KEY_CELESTIAL_GRID, true)); }
+		else if (key.equals(PREF_KEY_LABELS)) { mStarMapperRenderer.setLabelsIsEnabled(sharedPreferences.getBoolean(PREF_KEY_LABELS, true)); }
 	}
 }

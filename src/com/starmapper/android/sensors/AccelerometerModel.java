@@ -76,9 +76,10 @@ public class AccelerometerModel implements SensorEventListener, MathConstants {
 		Geocentric upVector   = MathUtils.multiplyGeocentricAndMatrix3x3(viewTransform, INIT_UP_VECTOR);
 		
 //		Log.d("AccelerometerModel", "INSIDE ACCELEROMETER SENSORCHANGED");
-		Log.d("AccelerometerModel", "ps_xx: " + String.valueOf(phoneSpaceMatrix.xx) + " ps_xy: " + String.valueOf(phoneSpaceMatrix.xy) + " ps_xz: " + String.valueOf(phoneSpaceMatrix.xz));
-		Log.d("AccelerometerModel", "ps_yx: " + String.valueOf(phoneSpaceMatrix.yx) + " ps_yy: " + String.valueOf(phoneSpaceMatrix.yy) + " ps_yz: " + String.valueOf(phoneSpaceMatrix.yz));
-		Log.d("AccelerometerModel", "ps_zx: " + String.valueOf(phoneSpaceMatrix.zx) + " ps_zy: " + String.valueOf(phoneSpaceMatrix.zy) + " ps_zz: " + String.valueOf(phoneSpaceMatrix.zz));
+		
+//		Log.d("AccelerometerModel", "ps_xx: " + String.valueOf(phoneSpaceMatrix.xx) + " ps_xy: " + String.valueOf(phoneSpaceMatrix.xy) + " ps_xz: " + String.valueOf(phoneSpaceMatrix.xz));
+//		Log.d("AccelerometerModel", "ps_yx: " + String.valueOf(phoneSpaceMatrix.yx) + " ps_yy: " + String.valueOf(phoneSpaceMatrix.yy) + " ps_yz: " + String.valueOf(phoneSpaceMatrix.yz));
+//		Log.d("AccelerometerModel", "ps_zx: " + String.valueOf(phoneSpaceMatrix.zx) + " ps_zy: " + String.valueOf(phoneSpaceMatrix.zy) + " ps_zz: " + String.valueOf(phoneSpaceMatrix.zz));
 
 
 //		Log.d("AccelerometerModel", "vt_xx: " + String.valueOf(viewTransform.xx) + " vt_xy: " + String.valueOf(viewTransform.xy) + " vt_xz: " + String.valueOf(viewTransform.xz));
@@ -97,10 +98,10 @@ public class AccelerometerModel implements SensorEventListener, MathConstants {
 		mRenderer.mUpY   = mUser.getNormalY();
 		mRenderer.mUpZ   = mUser.getNormalZ();
 		
-		Log.d("AccelerometerModel", "lastX: " + String.valueOf(last[0]) + " lastY: " + String.valueOf(last[1]) + " lastZ: " + String.valueOf(last[2]));
-		Log.d("AccelerometerModel", "currentX: " + String.valueOf(current[0]) + " currentY: " + String.valueOf(current[1]) + " currentZ: " + String.valueOf(current[2]));
-		Log.d("AccelerometerModel", "mLookX: " + String.valueOf(mUser.getLookX()) + " mLookY: " + String.valueOf(mUser.getLookY()) + " mLookZ: " + String.valueOf(mUser.getLookZ()));
-		Log.d("AccelerometerModel", "mUpX: " + String.valueOf(mUser.getNormalX()) + " mUpY: " + String.valueOf(mUser.getNormalY()) + " mUpZ: " + String.valueOf(mUser.getNormalZ()));
+//		Log.d("AccelerometerModel", "lastX: " + String.valueOf(last[0]) + " lastY: " + String.valueOf(last[1]) + " lastZ: " + String.valueOf(last[2]));
+//		Log.d("AccelerometerModel", "currentX: " + String.valueOf(current[0]) + " currentY: " + String.valueOf(current[1]) + " currentZ: " + String.valueOf(current[2]));
+//		Log.d("AccelerometerModel", "mLookX: " + String.valueOf(mUser.getLookX()) + " mLookY: " + String.valueOf(mUser.getLookY()) + " mLookZ: " + String.valueOf(mUser.getLookZ()));
+//		Log.d("AccelerometerModel", "mUpX: " + String.valueOf(mUser.getNormalX()) + " mUpY: " + String.valueOf(mUser.getNormalY()) + " mUpZ: " + String.valueOf(mUser.getNormalZ()));
 		
 		//mGLSurfaceView.requestRender();
 	}

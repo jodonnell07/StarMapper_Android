@@ -45,4 +45,8 @@ public class Constellation {
 	public int getNumLines() {
 		return ConstLines.size();
 	}
+	
+	public String getName() {
+		return name;
+	}
 }

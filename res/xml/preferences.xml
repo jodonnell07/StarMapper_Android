@@ -30,5 +30,9 @@
             android:key="settings_provider_celestial_grid"
             android:defaultValue="true"
             android:title="@string/settings_celestial_grid" />
+        <CheckBoxPreference
+            android:key="settings_provider_labels"
+            android:defaultValue="true"
+            android:title="@string/settings_labels" />
     </PreferenceCategory>
 </PreferenceScreen>

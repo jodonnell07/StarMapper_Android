@@ -9,10 +9,11 @@ import android.opengl.GLES20;
 
 import com.starmapper.android.constants.ArrayConstants;
 import com.starmapper.android.constants.MathConstants;
-import com.starmapper.android.utils.MathUtils;
 import com.starmapper.android.grid.Grid;
 import com.starmapper.android.grid.GridLine;
 import com.starmapper.android.math.Geocentric;
+import com.starmapper.android.math.RaDec;
+import com.starmapper.android.utils.MathUtils;
 
 public class GridManager implements ArrayConstants, MathConstants {
 
@@ -128,5 +129,13 @@ public class GridManager implements ArrayConstants, MathConstants {
 		GLES20.glDisableVertexAttribArray(positionHandle);
 		GLES20.glDisableVertexAttribArray(colorHandle);
 		GLES20.glDisableVertexAttribArray(textureCoordinateHandle);
+	}
+	
+	public void createLabels() {
+		// currently hard-coding positions of grid labels to RA = (0h, 6h, 12h, 18h), Dec = 0 degrees
+		mRenderer.mLabelManager.addLabel("0h", new Geocentric(new RaDec(0,0,0,0,0,0)), GRID_COLOR, GRID_TEXTSIZE, LabelTypeEnum.GRID);
+		mRenderer.mLabelManager.addLabel("6h", new Geocentric(new RaDec(6,0,0,0,0,0)), GRID_COLOR, GRID_TEXTSIZE, LabelTypeEnum.GRID);
+		mRenderer.mLabelManager.addLabel("12h", new Geocentric(new RaDec(12,0,0,0,0,0)), GRID_COLOR, GRID_TEXTSIZE, LabelTypeEnum.GRID);
+		mRenderer.mLabelManager.addLabel("18h", new Geocentric(new RaDec(18,0,0,0,0,0)), GRID_COLOR, GRID_TEXTSIZE, LabelTypeEnum.GRID);
 	}
 }

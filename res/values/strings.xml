@@ -16,5 +16,6 @@
     <string name="settings_moon">Moon</string>
     <string name="settings_planets">Planets</string>
     <string name="settings_celestial_grid">Celestial Grid</string>
+    <string name="settings_labels">Labels</string>
 
 </resources>

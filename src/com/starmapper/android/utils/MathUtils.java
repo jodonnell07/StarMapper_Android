@@ -183,8 +183,8 @@ public abstract class MathUtils implements MathConstants {
 		magField.resize(-1);
 		magField = normalize(magField);
 
-		Log.d("PhoneSpace", "Normalized: " + "accelX: " + String.valueOf(accel.x) + " accelY: " + String.valueOf(accel.y) + " accelZ: " + String.valueOf(accel.z));
-		Log.d("PhoneSpace", "Normalized: " + "magFieldX: " + String.valueOf(magField.x) + " magFieldY: " + String.valueOf(magField.y) + " magFieldZ: " + String.valueOf(magField.z));
+//		Log.d("PhoneSpace", "Normalized: " + "accelX: " + String.valueOf(accel.x) + " accelY: " + String.valueOf(accel.y) + " accelZ: " + String.valueOf(accel.z));
+//		Log.d("PhoneSpace", "Normalized: " + "magFieldX: " + String.valueOf(magField.x) + " magFieldY: " + String.valueOf(magField.y) + " magFieldZ: " + String.valueOf(magField.z));
 
 		// The vector to Earth's magnetic North
 //		float dotMagAcc = -dotProduct(magField, accel);

@@ -88,7 +88,7 @@ public class MagneticFieldModel implements SensorEventListener, MathConstants {
 		
 //		Log.d("MagneticFieldModel", "INSIDE MAGNETICFIELD SENSORCHANGED");
 //		Log.d("MagneticFieldModel", "lastX: " + String.valueOf(last[0]) + " lastY: " + String.valueOf(last[1]) + " lastZ: " + String.valueOf(last[2]));
-		Log.d("MagneticFieldModel", "currentX: " + String.valueOf(current[0]) + " currentY: " + String.valueOf(current[1]) + " currentZ: " + String.valueOf(current[2]));
+//		Log.d("MagneticFieldModel", "currentX: " + String.valueOf(current[0]) + " currentY: " + String.valueOf(current[1]) + " currentZ: " + String.valueOf(current[2]));
 //		Log.d("MagneticFieldModel", "mLookX: " + String.valueOf(lookVector.x) + " mLookY: " + String.valueOf(lookVector.y) + " mLookZ: " + String.valueOf(lookVector.z));
 		
 		//mGLSurfaceView.requestRender();

@@ -61,6 +61,7 @@ public final class R {
         public static final int settings_background_stars=0x7f060007;
         public static final int settings_celestial_grid=0x7f06000c;
         public static final int settings_constellations=0x7f060008;
+        public static final int settings_labels=0x7f06000d;
         public static final int settings_moon=0x7f06000a;
         public static final int settings_planets=0x7f06000b;
         public static final int settings_stars=0x7f060006;

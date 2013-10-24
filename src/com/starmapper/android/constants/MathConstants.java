@@ -1,10 +1,30 @@
 package com.starmapper.android.constants;
 
+import android.graphics.Color;
+
 import com.starmapper.android.math.Geocentric;
 import com.starmapper.android.utils.MathUtils;
 
 public interface MathConstants {
 
+	// ****label-related stuff**** //
+	public static enum LabelTypeEnum {
+		STAR, CONSTELLATION, SUN, MOON, PLANET, GRID
+	}
+	public static final int CONSTELLATION_COLOR 	= Color.BLUE;
+	public static final int STAR_COLOR				= Color.WHITE;
+	public static final int PLANET_COLOR			= Color.MAGENTA;
+	public static final int SUN_COLOR				= Color.RED;
+	public static final int MOON_COLOR				= Color.CYAN;
+	public static final int GRID_COLOR				= Color.YELLOW;	
+	public static final int CONSTELLATION_TEXTSIZE	= 32;
+	public static final int STAR_TEXTSIZE			= 32;
+	public static final int PLANET_TEXTSIZE			= 32;
+	public static final int SUN_TEXTSIZE			= 32;
+	public static final int MOON_TEXTSIZE			= 32;
+	public static final int GRID_TEXTSIZE			= 32;
+	// ****End of label-related stuff**** //
+	
 	public static final float PI 					= (float) Math.PI;
 	public static final float TWOPI 				= 2.0f * PI;
 	public static final float INIT_FOV_Y_RAD		= 45.0f * PI / 180.0f;
