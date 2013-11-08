@@ -22,8 +22,17 @@ public class RaDec {
 			  (float) argDecSecond / (float) 3600;
 	}
 
+	// Set methods
 	public void set(float argRa, float argDec) {
 		ra = argRa;
 		dec = argDec;
+	}
+	
+	// Get methods
+	public float getRA() {
+		return ra;
+	}
+	public float getDec() {
+		return dec;
 	}
 }

@@ -4,11 +4,13 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import android.content.Context;
 import android.opengl.GLES20;
+import android.util.Log;
 
 import com.starmapper.android.celestial.ConstLine;
 import com.starmapper.android.celestial.Constellation;
@@ -146,6 +148,7 @@ public class ConstellationManager implements BayerFileConstants , ArrayConstants
 			    Geocentric v = MathUtils.crossProduct(u, position);
 			    
 			    float sizer = star.magnitude * mRenderer.mPointSizeFactor;
+			    //Log.d("LABELSIZE", "mRenderer.mPointSizeFactor : " + mRenderer.mPointSizeFactor);
 			    Geocentric sized_u = new Geocentric(u.x * sizer, u.y * sizer, u.z * sizer);
 			    Geocentric sized_v = new Geocentric(v.x * sizer, v.y * sizer, v.z * sizer);
 			    
@@ -280,8 +283,9 @@ public class ConstellationManager implements BayerFileConstants , ArrayConstants
 	public void createLabels() {
 		for (Constellation constellation : ConstellationSet) {
 			// finding the center of each constellation, label will go there
-			float minX = 1.0f; float minY = 1.0f; float minZ = 1.0f;
-			float maxX = 0.0f; float maxY = 0.0f; float maxZ = 0.0f;
+			ArrayList<Float> RAlist = new ArrayList<Float>();
+			ArrayList<Float> Declist = new ArrayList<Float>();
+			
 			for (Star star : constellation.getStars()) {
 				// check for named stars in the constellation, they will have labels too
 				for (NamedStarsEnum starEnum : NamedStarsEnum.values()) {
@@ -291,13 +295,13 @@ public class ConstellationManager implements BayerFileConstants , ArrayConstants
 						break;
 					}
 				}
-				float x = star.geoCoords.x; float y = star.geoCoords.y; float z = star.geoCoords.z;
-				if (x < minX) { minX = x; }; if (x > maxX) { maxX = x; }
-				if (y < minY) { minY = y; }; if (y > maxY) { maxY = y; }
-				if (z < minZ) { minZ = z; }; if (z > maxZ) { maxZ = z; }
+				RAlist.add(star.getRA()); Declist.add(star.getDec());
 			}
-			float midX = (minX + maxX) / 2; float midY = (minY + maxY) / 2; float midZ = (minZ + maxZ) / 2;
-			Geocentric labelPos = new Geocentric(midX, midY, midZ);
+			Collections.sort(RAlist);
+			Collections.sort(Declist);
+			int midRA = (int) Math.ceil(RAlist.size() / 2);
+			int midDec = (int) Math.ceil(Declist.size() / 2);
+			Geocentric labelPos = new Geocentric(new RaDec(RAlist.get(midRA), Declist.get(midDec)));
 			labelPos = MathUtils.normalize(labelPos);
 			String name = constellation.getName();
 			mRenderer.mLabelManager.addLabel(name, labelPos, CONSTELLATION_COLOR, CONSTELLATION_TEXTSIZE, LabelTypeEnum.CONSTELLATION);

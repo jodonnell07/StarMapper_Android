@@ -18,6 +18,8 @@ public class User implements MathConstants, OrbitalElementsConstants {
 	public Geocentric lookDir;
 	public Geocentric lookNormal;
 	
+	public float mTextUpAngle;
+	
 	public Geocentric currentAcceleration;
 	public Geocentric currentMagneticField;
 	

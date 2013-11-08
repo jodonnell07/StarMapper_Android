@@ -11,11 +11,11 @@ public interface MathConstants {
 	public static enum LabelTypeEnum {
 		STAR, CONSTELLATION, SUN, MOON, PLANET, GRID
 	}
-	public static final int CONSTELLATION_COLOR 	= Color.BLUE;
+	public static final int CONSTELLATION_COLOR 	= Color.CYAN;
 	public static final int STAR_COLOR				= Color.WHITE;
 	public static final int PLANET_COLOR			= Color.MAGENTA;
 	public static final int SUN_COLOR				= Color.RED;
-	public static final int MOON_COLOR				= Color.CYAN;
+	public static final int MOON_COLOR				= Color.GRAY;
 	public static final int GRID_COLOR				= Color.YELLOW;	
 	public static final int CONSTELLATION_TEXTSIZE	= 32;
 	public static final int STAR_TEXTSIZE			= 32;
@@ -23,6 +23,12 @@ public interface MathConstants {
 	public static final int SUN_TEXTSIZE			= 32;
 	public static final int MOON_TEXTSIZE			= 32;
 	public static final int GRID_TEXTSIZE			= 32;
+	public static final float CONSTELLATION_OFFSET	= 0.01f;
+	public static final float STAR_OFFSET			= 0.02f;
+	public static final float PLANET_OFFSET			= 0.03f;
+	public static final float SUN_OFFSET			= 0.07f;
+	public static final float MOON_OFFSET			= 0.06f;
+	public static final float GRID_OFFSET			= 0.0f;
 	// ****End of label-related stuff**** //
 	
 	public static final float PI 					= (float) Math.PI;

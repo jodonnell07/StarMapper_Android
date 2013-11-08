@@ -16,6 +16,7 @@ import com.example.starmapper_android.R;
 import com.starmapper.android.constants.MathConstants;
 import com.starmapper.android.constants.OrbitalElementsConstants;
 import com.starmapper.android.math.Geocentric;
+import com.starmapper.android.user.User;
 import com.starmapper.android.utils.MathUtils;
 import com.starmapper.android.utils.RawResourceUtils;
 import com.starmapper.android.utils.ShaderUtils;
@@ -39,6 +40,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	public float mPointSizeFactor;
 	public float mBGPointSizeFactor;
 	public float mLineSizeFactor;
+	public float mLabelSizeFactor;
 	
 	/** View Matrix values **/
 	public float mEyeX;
@@ -50,6 +52,9 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	public float mUpX;
 	public float mUpY;
 	public float mUpZ;
+	
+	//TODO: combine user & view matrix values?
+	public User mUser;
 
 	/** Rendering Managers **/
 	private ConstellationManager mConstellationManager;
@@ -83,6 +88,14 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	private float[] mModelMatrix = new float[16];
 	/** Model/View/Projection Matrix. Will be passed into the shader program **/
 	private float[] mMVPMatrix = new float[16];
+	
+	
+	
+	// Label-related testing matrices
+	private float[] mProjectionMatrixIdentity = new float[16];
+	private float[] mViewMatrixIdentity = new float[16];
+	private float[] mModelMatrixIdentity = new float[16];
+	private float[] mMVPMatrixIdentity = new float[16];
 	
 	/** Store model data in a FloatBuffer **/
 /*
@@ -132,10 +145,15 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	/*
 	 * This constructor is only temporary to define the square the star texture will be written on
 	 */
-	public StarMapperRenderer(final Context activityContext) {
+	public StarMapperRenderer(final Context activityContext, User user) {
 		
 		mActivityContext = activityContext;
 		mActivityResources = activityContext.getResources();
+		
+		mUser = user;
+		
+		mScreenHeight = 1920;
+		mScreenWidth = 1080;
 		
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activityContext);
 		
@@ -162,6 +180,13 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		mUpX = INIT_UP_VECTOR.x;
 		mUpY = INIT_UP_VECTOR.y;
 		mUpZ = INIT_UP_VECTOR.z;
+		
+		// Setting identity matrices
+		Matrix.setIdentityM(mProjectionMatrixIdentity, 0);
+		Matrix.setIdentityM(mModelMatrixIdentity, 0);
+		Matrix.setLookAtM(mViewMatrixIdentity, 0, 0, 0, 0, 0, 0, -1, 0, 1, 0);
+		Matrix.multiplyMM(mMVPMatrixIdentity, 0, mViewMatrixIdentity, 0, mModelMatrixIdentity, 0);
+		Matrix.multiplyMM(mMVPMatrixIdentity, 0, mProjectionMatrixIdentity, 0, mMVPMatrixIdentity, 0);
 	}
 	
 	protected String getVertexShader() {
@@ -175,10 +200,6 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		
-//		Log.d("onDrawFrame", "Inside onDrawFrame");
-//		System.out.println(mScreenHeight);
-//		System.out.println(mScreenWidth);
-		
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 		
 		// Set the star drawing shader program
@@ -191,8 +212,6 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		mColorHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Color");
 		mTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");
 				
-//		mStarTextureDataHandle = TextureUtils.loadTexture(mActivityContext, R.raw.stars_texture);
-		
 		/* Matrix Updating */
 		if (mUpdatePerspective) {
 		    updatePerspectiveMatrix();
@@ -202,36 +221,13 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 			mPlanetManager.updateDrawData();
 			mSunManager.updateDrawData();
 			mMoonManager.updateDrawData();
-			mLabelManager.updateDrawData();
 		    mUpdatePerspective = false;
 		}
-/*		for (int i = 49; i > 0; --i) {
-			mLookVectorTracker[i+1][0] = mLookVectorTracker[i][0];
-			mLookVectorTracker[i+1][1] = mLookVectorTracker[i][1];
-			mLookVectorTracker[i+1][2] = mLookVectorTracker[i][2];
-		}
-		mLookVectorTracker[0][0] = mLookX;
-		mLookVectorTracker[0][1] = mLookY;
-		mLookVectorTracker[0][2] = mLookZ;
-*/		
-		// Set the View Matrix (camera position) (OnTouchEvent in main activity will change the look & up values)
-//		Log.d("TAG", "BEFORE UP FIXING   : " + "mUpX: " + String.valueOf(mUpX) + " mLookY: " + String.valueOf(mUpY) + " mLookZ: " + String.valueOf(mUpZ));
-		fixPerpendicular();
-//		Log.d("StarMapperRenderer", "mLookX: " + String.valueOf(mLookX) + " mLookY: " + String.valueOf(mLookY) + " mLookZ: " + String.valueOf(mLookZ));
-//		Log.d("StarMapperRenderer", "mUpX: " + String.valueOf(mUpX) + " mUpY: " + String.valueOf(mUpY) + " mUpZ: " + String.valueOf(mUpZ));
+		// label draw data is always updated to refresh orientation
+		mLabelManager.updateDrawData();
 		
-/*		//DEBUG
-		double planet_RA = MathUtils.arctand(mLookY / mLookX) * MathUtils.convertToDegrees;
-		if (mLookX > 0.0f && mLookY < 0.0f) {
-			planet_RA += 360.0f;
-		} else if (mLookX < 0.0f) {
-			planet_RA += 180.0f;
-		}
-		int planet_RA_Hours = (int) (planet_RA / 15);
-		int planet_RA_Minutes = (int) (((planet_RA % 15) / 15.0f) * 60);
-		double planet_Dec = MathUtils.arctan2d(mLookZ, Math.sqrt(mLookX * mLookX + mLookY * mLookY)) * MathUtils.convertToDegrees;
-		Log.d("StarMapperRenderer", "RaDec LookDir:  RA: " + String.valueOf(planet_RA_Hours) + "h " + String.valueOf(planet_RA_Minutes) + "'   Dec: " + String.valueOf(planet_Dec));
-*/
+		fixPerpendicular();
+		
 		Matrix.setLookAtM(mViewMatrix, 0, mEyeX, mEyeY, mEyeZ, mLookX, mLookY, mLookZ, mUpX, mUpY, mUpZ);
 		Matrix.setIdentityM(mModelMatrix, 0);
 		Matrix.translateM(mModelMatrix, 0, 0.0f, 0.0f, 0.0f);
@@ -287,6 +283,11 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mMoonTextureDataHandle);
 		    mMoonManager.drawMoon(mPositionHandle, mColorHandle, mTextureCoordinateHandle);
 		}
+		
+		
+		// Change matrix to represent 2D for labels
+		GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrixIdentity, 0);
+
 		if (mLabelsIsEnabled) {
 			// Bind labels texture to the texture target
 			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mLabelTextureDataHandle);
@@ -350,7 +351,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		mLineSizeFactor  = mPointSizeFactor * 2;
 		
 		// Initialize all the managers
-		mLabelManager = new LabelManager(this, mActivityResources);
+		mLabelManager = new LabelManager(this, mActivityResources, mUser);
 		mConstellationManager = new ConstellationManager(this);
 		mConstellationManager.BuildConstellationsFromRawResource(mActivityContext, R.raw.constellation_bayer_list);
 		mBGStarManager = new BGStarManager(this);
@@ -408,7 +409,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		mLabelManager.printLabelsToTexture(mLabelTextureDataHandle);
 		// initialize buffers after drawing to canvas because we need the total number of labels
 		mLabelManager.initializeBuffers();
-		mLabelManager.updateDrawData();
+		//mLabelManager.updateDrawData();
 		
 		// debugging text-based textures
 //		mLabelTextureDataHandle = mLabelManager.debugTexture();
@@ -456,6 +457,7 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 				-2 * far * near / (far - near),
 				0
 		};
+		
 		float viewSizeFactor = (120.0f - mFovYRad * MathUtils.convertToDegrees) * MathUtils.convertToRadians;
 		if (viewSizeFactor < 45.0f) {
 			viewSizeFactor = 45.0f;
@@ -464,7 +466,12 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		}
 		mPointSizeFactor = MathUtils.tan(viewSizeFactor / 2.0f) / mScreenHeight;
 		mLineSizeFactor  = mPointSizeFactor * 2;
-		Log.d("POINT_SIZE_FACTOR", String.valueOf(mPointSizeFactor));
+		mLabelSizeFactor = 2.5f + (2.0f - (((mFovYRad * MathUtils.convertToDegrees) - 15.0f) / 75.0f) * 2.0f);
+//		Log.d("LABELSIZE", "mPointSizeFactor : " + mPointSizeFactor);
+//		Log.d("LABELSIZE", "mLabelSizeFactor : " + mLabelSizeFactor);
+//		Log.d("LABELSIZE", "viewSizeFactor : " + viewSizeFactor);
+//		Log.d("LABELSIZE", "mFovY : " + mFovYRad * MathUtils.convertToDegrees);
+		//Log.d("POINT_SIZE_FACTOR", String.valueOf(mPointSizeFactor));
 	}
 	
 	public void fixPerpendicular() {		
@@ -494,6 +501,11 @@ public class StarMapperRenderer implements GLSurfaceView.Renderer, MathConstants
 		mBGPointSizeFactor = mPointSizeFactor / 3;
 		mLineSizeFactor  = mPointSizeFactor * 2;
 		mUpdatePerspective = true;
+	}
+	
+	public float[] getProjectionMatrix() {
+		float[] projectionMatrix = mProjectionMatrix;
+		return projectionMatrix;
 	}
 	
 	// Preference methods to set/disable drawing of different objects

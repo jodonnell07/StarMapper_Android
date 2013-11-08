@@ -5,6 +5,7 @@ import android.util.Log;
 import com.starmapper.android.constants.MathConstants;
 import com.starmapper.android.math.Geocentric;
 import com.starmapper.android.math.Matrix3x3;
+import com.starmapper.android.math.Matrix4x4;
 
 import android.hardware.GeomagneticField;
 
@@ -13,6 +14,8 @@ public abstract class MathUtils implements MathConstants {
 	// PI constants
 	public static final float PI = (float) Math.PI;
 	public static final float TWOPI = 2.0f * PI;
+	public static final float TWO_OVER_PI = 2.0f / (float) Math.PI;
+	public static final float PI_OVER_TWO = (float) Math.PI / 2.0f;
 	
 	// constant conversion functions
 	public static final float convertToRadians = PI / 180.0f;
@@ -143,6 +146,31 @@ public abstract class MathUtils implements MathConstants {
 							 m1.zx * m2.xy + m1.zy * m2.yy + m1.zz * m2.zy,
 							 m1.zx * m2.xz + m1.zy * m2.yz + m1.zz * m2.zz);
 	}
+	public static Matrix4x4 multiplyMatrices(Matrix4x4 matrix1, Matrix4x4 matrix2) {
+		float[] x = matrix1.getElements();
+		float[] y = matrix2.getElements();
+		return new Matrix4x4(new float[] {
+			x[0]*y[0] + x[4]*y[1] + x[8]*y[2] + x[12]*y[3],
+			x[1]*y[0] + x[5]*y[1] + x[9]*y[2] + x[13]*y[3],
+			x[2]*y[0] + x[6]*y[1] + x[10]*y[2] + x[14]*y[3],
+			x[3]*y[0] + x[7]*y[1] + x[11]*y[2] + x[15]*y[3],
+			
+			x[0]*y[4] + x[4]*y[5] + x[8]*y[6] + x[12]*y[7],
+			x[1]*y[4] + x[5]*y[5] + x[9]*y[6] + x[13]*y[7],
+			x[2]*y[4] + x[6]*y[5] + x[10]*y[6] + x[14]*y[7],
+			x[3]*y[4] + x[7]*y[5] + x[11]*y[6] + x[15]*y[7],
+
+			x[0]*y[8] + x[4]*y[9] + x[8]*y[10] + x[12]*y[11],
+			x[1]*y[8] + x[5]*y[9] + x[9]*y[10] + x[13]*y[11],
+			x[2]*y[8] + x[6]*y[9] + x[10]*y[10] + x[14]*y[11],
+			x[3]*y[8] + x[7]*y[9] + x[11]*y[10] + x[15]*y[11],
+
+			x[0]*y[12] + x[4]*y[13] + x[8]*y[14] + x[12]*y[15],
+			x[1]*y[12] + x[5]*y[13] + x[9]*y[14] + x[13]*y[15],
+			x[2]*y[12] + x[6]*y[13] + x[10]*y[14] + x[14]*y[15],
+			x[3]*y[12] + x[7]*y[13] + x[11]*y[14] + x[15]*y[15]});
+	}
+
 	
 	public static Matrix3x3 createRotationMatrix(float angle, Geocentric axis) {
 		float cosAngle = MathUtils.cos(angle);
@@ -227,14 +255,28 @@ public abstract class MathUtils implements MathConstants {
 							 magneticTrueZenith.z, zenith.z, magneticTrueEast.z);	
 	}
 	
-	
-	
 	public static Geocentric multiplyGeocentricAndMatrix3x3(Matrix3x3 mat, Geocentric geo) {
 		return new Geocentric(mat.xx * geo.x + mat.xy * geo.y + mat.xz * geo.z,
 							  mat.yx * geo.x + mat.yy * geo.y + mat.yz * geo.z,
 							  mat.zx * geo.x + mat.zy * geo.y + mat.zz * geo.z);
 	}
 	
+	public static Geocentric multiplyGeocentricAndMatrix4x4(Matrix4x4 mat, Geocentric geo) {
+		float[] m = mat.getElements();
+		return new Geocentric(m[0]*geo.x + m[4]*geo.y + m[8]*geo.z + m[12],
+							  m[1]*geo.x + m[5]*geo.y + m[9]*geo.z + m[13],
+							  m[2]*geo.x + m[6]*geo.y + m[10]*geo.z + m[14]);
+	}
+	
+	public static Geocentric transformLabelToScreenPosition(Matrix4x4 transform, Geocentric pos) {
+		Geocentric transformedPos = multiplyGeocentricAndMatrix4x4(transform, pos);
+		float[] m = transform.getElements();
+		float perspectiveFactor = m[3]*pos.x + m[7]*pos.y + m[11]*pos.z + m[15];
+		float oneOverPFactor = 1.0f / perspectiveFactor;
+		transformedPos.x *= oneOverPFactor;
+		transformedPos.y *= oneOverPFactor;
+		return transformedPos;
+	}
 	
 	/*
 	 * Celestial Functions

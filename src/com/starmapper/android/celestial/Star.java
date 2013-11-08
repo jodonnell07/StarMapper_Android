@@ -43,4 +43,10 @@ public class Star {
 	public Geocentric getCoords() {
 		return geoCoords;
 	}
+	public float getRA() {
+		return raDec.ra;
+	}
+	public float getDec() {
+		return raDec.dec;
+	}
 }

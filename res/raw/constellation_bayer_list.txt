@@ -84,7 +84,7 @@ Sextans:gamma_Sex 9 52 30 -8 -6 -18 5.07 0:alpha_Sex 10 7 56 0 -22 -18 4.48 1:be
 Taurus:xi_Tau 3 27 10 9 43 58 3.73 0:lambda_Tau 4 0 41 12 29 25 3.41 1:gamma_Tau 4 19 48 15 37 40 3.65 2:Aldebaran 4 35 55 16 30 35 0.87 3:zeta_Tau 5 37 39 21 8 33 2.97 4:delta_Tau 4 22 56 17 32 33 3.77 5:epsilon_Tau 4 28 37 19 10 50 3.53 6:Elnath 5 26 18 28 36 28 1.65 7:0-1,1-2,2-3,3-4,2-5,5-6,6-7
 Telescopium:alpha_Tel 18 26 58 -45 -58 -6 3.49 0:zeta_Tel 18 28 50 -49 -4 -12 4.10 1:0-1
 Triangulum:alpha_Tri 1 53 5 29 34 46 3.42 0:beta_Tri 2 9 33 34 59 15 3.00 1:gamma_Tri 2 17 19 33 50 50 4.03 2:0-1,1-2,2-0
-Triangulum Australe:alpha_TrA 16 48 40 -69 -1 -40 1.91 0:beta_TrA 15 55 9 -63 -25 -47 2.83 1:epsilon_TrA 15 36 43 -6 -19 -1 4.11 2:gamma_TrA 15 18 55 -68 -40 -46 2.87 3:0-1,1-2,2-3,3-0
+#Triangulum Australe:alpha_TrA 16 48 40 -69 -1 -40 1.91 0:beta_TrA 15 55 9 -63 -25 -47 2.83 1:epsilon_TrA 15 36 43 -6 -19 -1 4.11 2:gamma_TrA 15 18 55 -68 -40 -46 2.87 3:0-1,1-2,2-3,3-0
 Tucana:delta_Tuc 22 27 20 -64 -57 -59 4.51 0:alpha_Tuc 22 18 30 -60 -15 -34 2.87 1:gamma_Tuc 23 17 26 -58 -14 -10 3.99 2:beta_Tuc 0 31 33 -62 -57 -29 4.36 3:zeta_Tuc 0 20 2 -64 -52 -39 4.23 4:epsilon_Tuc 23 59 55 -65 -34 -38 4.49 5:0-1,1-2,2-3,3-4,4-5,5-2
 Ursa Minor:Polaris 2 31 47 89 15 51 1.97 0:beta_UMi 14 50 42 74 09 20 2.07 4:gamma_UMi 15 20 44 71 50 2 3 5:epsilon_UMi 16 45 58 82 2 14 4.21 2:eta_UMi 16 17 30 75 45 19 4.95 6:zeta_UMi 15 44 3 77 47 40 4.29 3:delta_UMi 17 32 13 86 35 11 4.35 1:0-1,1-2,2-3,3-4,4-5,5-6,6-3
 Ursa Major:alpha_UMa 11 3 44 61 45 4 1.79 6:beta_UMa 11 1 50 56 22 57 2.37 5:gamma_UMa 11 53 50 53 41 41 2.44 4:delta_UMa 12 15 26 57 1 57 3.31 3:epsilon_UMa 12 54 2 55 57 35 1.77 2:zeta_UMa 13 23 56 54 55 31 2.23 1:eta_UMa 13 47 32 49 18 48 1.84 0:0-1,1-2,2-3,3-4,4-5,5-6,6-3

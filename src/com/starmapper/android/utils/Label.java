@@ -18,19 +18,31 @@ public class Label implements MathConstants {
 	
 	private LabelTypeEnum type;
 	
+	private float offset;
+	
 	// texture-related data
 	private int mWidthPxls;
 	private int mHeightPxls;
 	private float[] mTexCoords;
 	
+	// screen position in Y-direction is (1920 - Y) since top->bottom = 0->1
+	private boolean onScreen;
+	public int screenPos_xll;
+	public int screenPos_yll;
+	public int screenPos_xur;
+	public int screenPos_yur;
+	
 	
 	// Constructors
-	public Label(String text, Geocentric pos, int color, int size, LabelTypeEnum type) {
+	public Label(String text, Geocentric pos, int color, int size, LabelTypeEnum type, float offset) {
 		this.text = text;
 		this.color = color;
 		this.size = size;
 		this.type = type;
+		this.offset = offset;
 		position = new Geocentric(pos.x, pos.y, pos.z);
+		screenPos_xll = 0; screenPos_yll = 0;
+		screenPos_xur = 0; screenPos_yur = 0;
 		mTexCoords = new float[12];
 	}
 		
@@ -50,8 +62,20 @@ public class Label implements MathConstants {
 	public LabelTypeEnum getType() {
 		return type;
 	}
+	public int getPixelWidth() {
+		return mWidthPxls;
+	}
+	public int getPixelHeight() {
+		return mHeightPxls;
+	}
 	public float[] getTexCoords() {
 		return mTexCoords;
+	}
+	public float getOffset() {
+		return offset;
+	}
+	public boolean isOnScreen() {
+		return onScreen;
 	}
 	
 	// Set methods
@@ -69,6 +93,12 @@ public class Label implements MathConstants {
 	}
 	public void setType(LabelTypeEnum type) {
 		this.type = type;
+	}
+	public void setOffset(float offset) {
+		this.offset = offset;
+	}
+	public void setOnScreen(boolean onScreen) {
+		this.onScreen = onScreen;
 	}
 	
 	// setting the texture data

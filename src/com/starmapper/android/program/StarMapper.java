@@ -2,6 +2,7 @@ package com.starmapper.android.program;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ActivityInfo;
@@ -10,15 +11,16 @@ import android.hardware.SensorManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.widget.Toast;
 
 import com.example.starmapper_android.R;
 import com.starmapper.android.constants.MathConstants;
@@ -29,6 +31,7 @@ import com.starmapper.android.sensors.MagneticFieldModel;
 import com.starmapper.android.user.User;
 import com.starmapper.android.utils.Flinger;
 import com.starmapper.android.utils.Flinger.FlingListener;
+import com.starmapper.android.utils.Label;
 import com.starmapper.android.utils.MathUtils;
 import com.starmapper.android.utils.Zoom;
 
@@ -73,6 +76,8 @@ public class StarMapper extends Activity implements MathConstants, OnSharedPrefe
 	
 	/** For touchscreen **/
 	private enum TouchState {INIT, DRAG_ONE, DRAG_TWO}
+	private int mInitX;
+	private int mInitY;
 	private float mPreviousX1;
 	private float mPreviousY1;
 	private float mPreviousX2;
@@ -115,14 +120,14 @@ public class StarMapper extends Activity implements MathConstants, OnSharedPrefe
 //		mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 		setContentView(mGLSurfaceView);
 		
-		mStarMapperRenderer = new StarMapperRenderer(this);
+		// The app user object
+		mUser = new User();
+
+		mStarMapperRenderer = new StarMapperRenderer(this, mUser);
 		
 		// Set the StarMapperRenderer for drawing on the GLSurfaceView
 		mGLSurfaceView.setRenderer(mStarMapperRenderer);
 		
-		// The app user object
-		mUser = new User();
-
 		// Retrieving location
 		mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		Criteria locCriteria = new Criteria();
@@ -253,18 +258,18 @@ public class StarMapper extends Activity implements MathConstants, OnSharedPrefe
 	
 	@Override
 	public boolean onTouchEvent(MotionEvent e) {
-//		Log.d("onTouchEvent", "Current mCurrentTouchState value");
-//		Log.d("onTouchEvent", String.valueOf(mCurrentTouchState));
-		
+		int action = e.getAction() & MotionEvent.ACTION_MASK;		
 		// Check whether in touch/sensor mode
-		if (mUseAutoSensorMode) { return true; }
+		if (mUseAutoSensorMode) {
+			processTouch(action, e, mUseAutoSensorMode);
+			return true;
+		}
 		
 		boolean touchResult = false;
 		if (flinger.onTouchEvent(e)) {
 			touchResult = true;
 		}
-		int action = e.getAction() & MotionEvent.ACTION_MASK;
-		if (processTouch(action, e)) {
+		if (processTouch(action, e, mUseAutoSensorMode)) {
 			touchResult = true;
 		}
 		return touchResult;
@@ -309,16 +314,20 @@ public class StarMapper extends Activity implements MathConstants, OnSharedPrefe
 		mUser.setLookNormal(newUpDir);
 	}
 	
-	private boolean processTouch(int action, MotionEvent e) {
+	private boolean processTouch(int action, MotionEvent e, boolean sensorMode) {
 		switch (action) {
 		case MotionEvent.ACTION_DOWN:
 			if (mCurrentTouchState == TouchState.INIT) {
+			    mInitX = (int) e.getX();
+			    mInitY = (int) e.getY();
+			    if (sensorMode) { return true; }
 				mCurrentTouchState = TouchState.DRAG_ONE;
 			    mPreviousX1 = e.getX();
 			    mPreviousY1 = e.getY();
 			    return true;
 			}
 		case MotionEvent.ACTION_POINTER_DOWN:
+			if (sensorMode) { return true; }
 			if (mCurrentTouchState == TouchState.DRAG_ONE) {
 				mCurrentTouchState = TouchState.DRAG_TWO;
 				mPointerIndex = e.getActionIndex();
@@ -329,6 +338,7 @@ public class StarMapper extends Activity implements MathConstants, OnSharedPrefe
 				return true;
 			}
 		case MotionEvent.ACTION_MOVE:
+			if (sensorMode) { return true; }
 			if (mCurrentTouchState == TouchState.DRAG_ONE) {
 			    float currentX = e.getX();
 			    float currentY = e.getY();
@@ -394,11 +404,34 @@ public class StarMapper extends Activity implements MathConstants, OnSharedPrefe
 			    return true;
 			}
 		case MotionEvent.ACTION_UP:
+			int last_X = (int) e.getX();
+			int last_Y = (int) e.getY();
+			int dx = Math.abs(last_X - mInitX); int dy = Math.abs(last_Y - mInitY);
+			if (dx <= 20 && dy <= 20) {
+				for (Label label : mStarMapperRenderer.mLabelManager.LabelSet) {
+					int xll = label.screenPos_xll; int yll = label.screenPos_yll;
+					int xur = label.screenPos_xur; int yur = label.screenPos_yur;
+					LabelTypeEnum type = label.getType();
+					if (label.isOnScreen() && xll <= mInitX && xur >= mInitX && yll <= mInitY && yur >= mInitY &&
+						type != LabelTypeEnum.GRID) {
+						String name = label.getText().replaceAll(" ", "_");
+						String URL = "http://en.wikipedia.org/wiki/" + name;
+						if (type == LabelTypeEnum.CONSTELLATION || type == LabelTypeEnum.STAR || type == LabelTypeEnum.PLANET) {
+							URL = URL + "_(" + label.getType().name().toLowerCase() + ")";
+						}
+						Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(URL));
+						startActivity(browserIntent);
+						//Toast.makeText(this, label.getText(), Toast.LENGTH_SHORT).show();							
+					}
+				}
+			}
+			if (sensorMode) { return true; }
 			if (mCurrentTouchState != TouchState.INIT) {
 				mCurrentTouchState = TouchState.INIT;
 				return true;
 			}
 		case MotionEvent.ACTION_POINTER_UP:
+			if (sensorMode) { return true; }
 			if (mCurrentTouchState == TouchState.DRAG_TWO) {
 				mCurrentTouchState = TouchState.INIT;
 			}
